@@ -23,6 +23,7 @@ export default function Chat() {
     const channel = pusher.subscribe("private-petchat");
 
     channel.bind("message", data => {
+      // console.log(data);
       setMessageLog(prev => [...prev, data]);
     });
   }, []);
@@ -41,7 +42,7 @@ export default function Chat() {
     setIsChatOpen(true);
     setUnreadCount(0);
 
-    // let transition finish before setting focus
+    // let transition (300ms) finish before setting focus
     setTimeout(() => {
       chatField.current.focus();
     }, 350);
@@ -53,22 +54,26 @@ export default function Chat() {
 
   function handleChatSubmit(e) {
     e.preventDefault();
+    // To Pusher
     fetch("/admin/send-chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: userMessage, socket_id: socketId })
     });
 
+    // To local state
     setMessageLog(prev => [
       ...prev,
       { selfMessage: true, message: userMessage }
     ]);
 
+    // clear after sending message
     setUserMessage("");
   }
 
   function handleInputChange(e) {
-    setUserMessage(e.target.value.trim());
+    // does not work with trim setUserMessage(e.target.value.trim());
+    setUserMessage(e.target.value);
   }
 
   return (
